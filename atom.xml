@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-06-23T09:04:03.226Z</updated>
+  <updated>2020-06-24T07:24:09.999Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,70 +17,27 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>MyBatisPlus笔记.md</title>
-    <link href="http://yoursite.com/2020/06/23/MyBatisPlus%E7%AC%94%E8%AE%B0-md/"/>
-    <id>http://yoursite.com/2020/06/23/MyBatisPlus%E7%AC%94%E8%AE%B0-md/</id>
-    <published>2020-06-23T08:35:55.000Z</published>
-    <updated>2020-06-23T09:04:03.226Z</updated>
+    <title>Java自定义排序</title>
+    <link href="http://yoursite.com/2020/06/24/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/"/>
+    <id>http://yoursite.com/2020/06/24/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/</id>
+    <published>2020-06-24T07:20:43.000Z</published>
+    <updated>2020-06-24T07:24:09.999Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="1-第一级标题"><a href="#1-第一级标题" class="headerlink" title="1.第一级标题"></a>1.第一级标题</h1><h2 id="2-第二季标题"><a href="#2-第二季标题" class="headerlink" title="2.第二季标题"></a>2.第二季标题</h2><h3 id="3-第三季标题"><a href="#3-第三季标题" class="headerlink" title="3.第三季标题"></a>3.第三季标题</h3>]]></content>
+    <content type="html"><![CDATA[<blockquote><p>在Java中如果要自定义某些规则实现对象的排序，可以通过Comparable和Comparator来实现。Comparable被称之为内部比较器，需要对象实现此接口并重写其compareTo()方法。Comparator被称之为外部比较器，也是一个接口。与Comparable不同的是，使用Comparator并不需要对象实现此接口，只需要在进行比较的时候，重写Comparator中的compare()方法。<br><br>既然有了Comparable为什么还需要Comparator? 试想这么一种场景：对于User对象，在场景一中希望根据用户年龄排序。在场景二中希望根据用户生日排序。很明显Comparable并不适合这种业务要求。</p></blockquote><a id="more"></a><h2 id="Java是如何判断顺序的"><a href="#Java是如何判断顺序的" class="headerlink" title="Java是如何判断顺序的?"></a>Java是如何判断顺序的?</h2><p>查看Java的源码，比如Integer或者String。其都存在一个compareTo()的方法。以下是Integer的compareTo()方法源码:</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Integer anotherInteger)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> compare(<span class="keyword">this</span>.value, anotherInteger.value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (x &lt; y) ? -<span class="number">1</span> : ((x == y) ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>查看源码可知: compareTo()方法中调用了compare()方法，接收两个参数x、y。如果 x &lt; y 返回-1，如果 x == y 返回0，如果 x &gt; y返回1。</p><p>那么-1,0,1都有什么意义呢?</p><ul><li>-1 代表交换顺序</li><li>0  代表不交换顺序</li><li>1  代表不交换顺序</li></ul><p><strong>注意: 0和1都代表不交换顺序,那它们有什么区别呢?网上有的资料上说: 对于相同的元素，0不会调整位置，1会调整位置。比如对于[2,5,8,8,9],如果返回0，那么下标为2的8和下标为3的8不会调整位置。如果返回-1，则下标为2的8和下标为3的8会调整位置。简略来讲：0和1都代表不交换顺序</strong></p><h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><blockquote><p>User对象有三个属性，分别是id,name,age。要求根据age从大到小排序。</p></blockquote><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建User对象</span></span><br><span class="line">    User user1 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"李四"</span>, <span class="number">14</span>);</span><br><span class="line">    User user2 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"张三"</span>, <span class="number">25</span>);</span><br><span class="line">    User user3 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"王二麻子"</span>, <span class="number">25</span>);</span><br><span class="line">    User user4 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Tom"</span>, <span class="number">17</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加到集合中</span></span><br><span class="line">    List&lt;User&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    list.add(user1);</span><br><span class="line">    list.add(user2);</span><br><span class="line">    list.add(user3);</span><br><span class="line">    list.add(user4);</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"排序前的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// u1代表当前对象，u2代表比较对象</span></span><br><span class="line">    list.sort((u1, u2) -&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (u1.getAge() &gt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// 1代表不交换顺序，所以u1会排在u2前面。并且u1.getAge() &gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (u1.getAge() &lt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// -1代表交换位置，所以u1会排在u2后面。并且u1.getAge() &lt;&gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 0代表不交换顺序</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    System.out.println(<span class="string">"排序后的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>输出结果如下：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">排序前的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line"></span><br><span class="line">排序后的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br></pre></td></tr></table></figure>]]></content>
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;1-第一级标题&quot;&gt;&lt;a href=&quot;#1-第一级标题&quot; class=&quot;headerlink&quot; title=&quot;1.第一级标题&quot;&gt;&lt;/a&gt;1.第一级标题&lt;/h1&gt;&lt;h2 id=&quot;2-第二季标题&quot;&gt;&lt;a href=&quot;#2-第二季标题&quot; class=&quot;headerlink
-      
+      &lt;blockquote&gt;
+&lt;p&gt;在Java中如果要自定义某些规则实现对象的排序，可以通过Comparable和Comparator来实现。Comparable被称之为内部比较器，需要对象实现此接口并重写其compareTo()方法。Comparator被称之为外部比较器，也是一个接口。与Comparable不同的是，使用Comparator并不需要对象实现此接口，只需要在进行比较的时候，重写Comparator中的compare()方法。&lt;br&gt;&lt;br&gt;既然有了Comparable为什么还需要Comparator? 试想这么一种场景：对于User对象，在场景一中希望根据用户年龄排序。在场景二中希望根据用户生日排序。很明显Comparable并不适合这种业务要求。&lt;/p&gt;
+&lt;/blockquote&gt;
     
     </summary>
     
     
-    
-  </entry>
-  
-  <entry>
-    <title>我的第一篇博客</title>
-    <link href="http://yoursite.com/2020/06/23/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
-    <id>http://yoursite.com/2020/06/23/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</id>
-    <published>2020-06-23T04:50:11.000Z</published>
-    <updated>2020-06-23T04:54:07.661Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="dadafdadf"><a href="#dadafdadf" class="headerlink" title="dadafdadf"></a>dadafdadf</h2>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h2 id=&quot;dadafdadf&quot;&gt;&lt;a href=&quot;#dadafdadf&quot; class=&quot;headerlink&quot; title=&quot;dadafdadf&quot;&gt;&lt;/a&gt;dadafdadf&lt;/h2&gt;
-      
-    
-    </summary>
+      <category term="Java" scheme="http://yoursite.com/categories/Java/"/>
     
     
-    
-      <category term="ad" scheme="http://yoursite.com/tags/ad/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yoursite.com/2020/06/22/hello-world/"/>
-    <id>http://yoursite.com/2020/06/22/hello-world/</id>
-    <published>2020-06-22T13:29:26.698Z</published>
-    <updated>2020-06-22T13:29:26.698Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-      
-    
-    </summary>
-    
-    
+      <category term="排序" scheme="http://yoursite.com/tags/%E6%8E%92%E5%BA%8F/"/>
     
   </entry>
   
