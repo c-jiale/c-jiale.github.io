@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Java自定义排序</title>
+    <url>/2018/06/20/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/</url>
+    <content><![CDATA[<blockquote>
+<p>在Java中如果要自定义某些规则实现对象的排序，可以通过Comparable和Comparator来实现。Comparable被称之为内部比较器，需要对象实现此接口并重写其compareTo()方法。Comparator被称之为外部比较器，也是一个接口。与Comparable不同的是，使用Comparator并不需要对象实现此接口，只需要在进行比较的时候，重写Comparator中的compare()方法。<br><br>既然有了Comparable为什么还需要Comparator? 试想这么一种场景：对于User对象，在场景一中希望根据用户年龄排序。在场景二中希望根据用户生日排序。很明显Comparable并不适合这种业务要求。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="Java是如何判断顺序的"><a href="#Java是如何判断顺序的" class="headerlink" title="Java是如何判断顺序的?"></a>Java是如何判断顺序的?</h2><p>查看Java的源码，比如Integer或者String。其都存在一个compareTo()的方法。以下是Integer的compareTo()方法源码:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Integer anotherInteger)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> compare(<span class="keyword">this</span>.value, anotherInteger.value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (x &lt; y) ? -<span class="number">1</span> : ((x == y) ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查看源码可知: compareTo()方法中调用了compare()方法，接收两个参数x、y。如果 x &lt; y 返回-1，如果 x == y 返回0，如果 x &gt; y返回1。</p>
+<p>那么-1,0,1都有什么意义呢?</p>
+<ul>
+<li>-1 代表交换顺序</li>
+<li>0  代表不交换顺序</li>
+<li>1  代表不交换顺序</li>
+</ul>
+<p><strong>注意: 0和1都代表不交换顺序,那它们有什么区别呢?网上有的资料上说: 对于相同的元素，0不会调整位置，1会调整位置。比如对于[2,5,8,8,9],如果返回0，那么下标为2的8和下标为3的8不会调整位置。如果返回-1，则下标为2的8和下标为3的8会调整位置。简略来讲：0和1都代表不交换顺序</strong></p>
+<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><blockquote>
+<p>User对象有三个属性，分别是id,name,age。要求根据age从大到小排序。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建User对象</span></span><br><span class="line">    User user1 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"李四"</span>, <span class="number">14</span>);</span><br><span class="line">    User user2 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"张三"</span>, <span class="number">25</span>);</span><br><span class="line">    User user3 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"王二麻子"</span>, <span class="number">25</span>);</span><br><span class="line">    User user4 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Tom"</span>, <span class="number">17</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加到集合中</span></span><br><span class="line">    List&lt;User&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    list.add(user1);</span><br><span class="line">    list.add(user2);</span><br><span class="line">    list.add(user3);</span><br><span class="line">    list.add(user4);</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"排序前的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// u1代表当前对象，u2代表比较对象</span></span><br><span class="line">    list.sort((u1, u2) -&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (u1.getAge() &gt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// 1代表不交换顺序，所以u1会排在u2前面。并且u1.getAge() &gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (u1.getAge() &lt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// -1代表交换位置，所以u1会排在u2后面。并且u1.getAge() &lt;&gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 0代表不交换顺序</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    System.out.println(<span class="string">"排序后的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">排序前的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line"></span><br><span class="line">排序后的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>排序</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java Lambda表达式</title>
     <url>/2018/06/21/Java-Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<blockquote>
@@ -49,38 +81,6 @@
       </categories>
       <tags>
         <tag>lambdahe</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java自定义排序</title>
-    <url>/2018/06/20/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/</url>
-    <content><![CDATA[<blockquote>
-<p>在Java中如果要自定义某些规则实现对象的排序，可以通过Comparable和Comparator来实现。Comparable被称之为内部比较器，需要对象实现此接口并重写其compareTo()方法。Comparator被称之为外部比较器，也是一个接口。与Comparable不同的是，使用Comparator并不需要对象实现此接口，只需要在进行比较的时候，重写Comparator中的compare()方法。<br><br>既然有了Comparable为什么还需要Comparator? 试想这么一种场景：对于User对象，在场景一中希望根据用户年龄排序。在场景二中希望根据用户生日排序。很明显Comparable并不适合这种业务要求。</p>
-</blockquote>
-<a id="more"></a>
-
-<h2 id="Java是如何判断顺序的"><a href="#Java是如何判断顺序的" class="headerlink" title="Java是如何判断顺序的?"></a>Java是如何判断顺序的?</h2><p>查看Java的源码，比如Integer或者String。其都存在一个compareTo()的方法。以下是Integer的compareTo()方法源码:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Integer anotherInteger)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> compare(<span class="keyword">this</span>.value, anotherInteger.value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (x &lt; y) ? -<span class="number">1</span> : ((x == y) ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>查看源码可知: compareTo()方法中调用了compare()方法，接收两个参数x、y。如果 x &lt; y 返回-1，如果 x == y 返回0，如果 x &gt; y返回1。</p>
-<p>那么-1,0,1都有什么意义呢?</p>
-<ul>
-<li>-1 代表交换顺序</li>
-<li>0  代表不交换顺序</li>
-<li>1  代表不交换顺序</li>
-</ul>
-<p><strong>注意: 0和1都代表不交换顺序,那它们有什么区别呢?网上有的资料上说: 对于相同的元素，0不会调整位置，1会调整位置。比如对于[2,5,8,8,9],如果返回0，那么下标为2的8和下标为3的8不会调整位置。如果返回-1，则下标为2的8和下标为3的8会调整位置。简略来讲：0和1都代表不交换顺序</strong></p>
-<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><blockquote>
-<p>User对象有三个属性，分别是id,name,age。要求根据age从大到小排序。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建User对象</span></span><br><span class="line">    User user1 = <span class="keyword">new</span> User(<span class="number">2</span>, <span class="string">"李四"</span>, <span class="number">14</span>);</span><br><span class="line">    User user2 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"张三"</span>, <span class="number">25</span>);</span><br><span class="line">    User user3 = <span class="keyword">new</span> User(<span class="number">1</span>, <span class="string">"王二麻子"</span>, <span class="number">25</span>);</span><br><span class="line">    User user4 = <span class="keyword">new</span> User(<span class="number">3</span>, <span class="string">"Tom"</span>, <span class="number">17</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加到集合中</span></span><br><span class="line">    List&lt;User&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    list.add(user1);</span><br><span class="line">    list.add(user2);</span><br><span class="line">    list.add(user3);</span><br><span class="line">    list.add(user4);</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"排序前的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// u1代表当前对象，u2代表比较对象</span></span><br><span class="line">    list.sort((u1, u2) -&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (u1.getAge() &gt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// 1代表不交换顺序，所以u1会排在u2前面。并且u1.getAge() &gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (u1.getAge() &lt; u2.getAge()) &#123;</span><br><span class="line">            <span class="comment">// -1代表交换位置，所以u1会排在u2后面。并且u1.getAge() &lt;&gt; u2.getAge()</span></span><br><span class="line">            <span class="comment">// 所以age大的会在前面</span></span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 0代表不交换顺序</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    System.out.println(<span class="string">"排序后的数据:"</span>);</span><br><span class="line">    list.forEach(System.out::println);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>输出结果如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">排序前的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line"></span><br><span class="line">排序后的数据:</span><br><span class="line">User&#123;id=<span class="number">2</span>, name=<span class="string">'李四'</span>, age=<span class="number">14</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">3</span>, name=<span class="string">'Tom'</span>, age=<span class="number">17</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'张三'</span>, age=<span class="number">25</span>&#125;</span><br><span class="line">User&#123;id=<span class="number">1</span>, name=<span class="string">'王二麻子'</span>, age=<span class="number">25</span>&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>排序</tag>
       </tags>
   </entry>
 </search>
