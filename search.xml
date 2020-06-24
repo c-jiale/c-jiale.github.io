@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Java Lambda表达式</title>
-    <url>/2020/06/24/Java-Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
+    <url>/2020/06/21/Java-Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<blockquote>
 <p>Java8新增的lambda表达式是一个可传递的代码块，可以在以后被重复执行一次或则多次。lambda作为在Java8中新增的一个功能，已经被越来越多的框架所使用。在讲lambda之前，有必要先说一下什么是函数式接口</p>
 </blockquote>
@@ -48,12 +48,12 @@
         <category>Java</category>
       </categories>
       <tags>
-        <tag>lambda</tag>
+        <tag>lambdahe</tag>
       </tags>
   </entry>
   <entry>
     <title>Java自定义排序</title>
-    <url>/2020/06/24/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/</url>
+    <url>/2018/06/20/Java%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<blockquote>
 <p>在Java中如果要自定义某些规则实现对象的排序，可以通过Comparable和Comparator来实现。Comparable被称之为内部比较器，需要对象实现此接口并重写其compareTo()方法。Comparator被称之为外部比较器，也是一个接口。与Comparable不同的是，使用Comparator并不需要对象实现此接口，只需要在进行比较的时候，重写Comparator中的compare()方法。<br><br>既然有了Comparable为什么还需要Comparator? 试想这么一种场景：对于User对象，在场景一中希望根据用户年龄排序。在场景二中希望根据用户生日排序。很明显Comparable并不适合这种业务要求。</p>
 </blockquote>
